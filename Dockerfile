@@ -1,18 +1,9 @@
-FROM python:3.10.5-alpine
-
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-
-RUN adduser -D appuser
-
-USER appuser
-
-WORKDIR /home/appuser/
-
-COPY --chown=appuser:appuser requirements.txt .
-
-RUN python -m pip install --user --no-cache-dir --disable-pip-version-check --requirement requirements.txt
-
-COPY --chown=appuser:appuser . .
-
-ENTRYPOINT [ "./entrypoint.sh" ]
+FROM nikolaik/python-nodejs:python3.9-nodejs18
+RUN apt-get update -y && apt-get upgrade -y \
+    && apt-get install -y --no-install-recommends ffmpeg \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+COPY . /app/
+WORKDIR /app/
+RUN pip3 install --no-cache-dir --upgrade --requirement requirements.txt
+CMD bash start
