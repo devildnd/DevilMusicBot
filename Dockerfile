@@ -1,11 +1,18 @@
-FROM python:3.11-bookworm
+FROM python:3.10.5-alpine
 
-RUN apt-get update -y && apt-get upgrade -y \
-    && apt-get install -y --no-install-recommends ffmpeg \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-COPY . /app/
-WORKDIR /app/
-RUN pip3 install --no-cache-dir --upgrade pip
-RUN pip3 install --no-cache-dir --upgrade --requirement requirements.txt
-CMD python3 -m eduntech
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+RUN adduser -D appuser
+
+USER appuser
+
+WORKDIR /home/appuser/
+
+COPY --chown=appuser:appuser requirements.txt .
+
+RUN python -m pip install --user --no-cache-dir --disable-pip-version-check --requirement requirements.txt
+
+COPY --chown=appuser:appuser . .
+
+ENTRYPOINT [ "./entrypoint.sh" ]
